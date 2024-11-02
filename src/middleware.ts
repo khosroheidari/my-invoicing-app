@@ -1,17 +1,9 @@
-import { WithClerkMiddleware, getAuth } from "@clerk/nextjs/server";
-import { NextResponse } from "next/server";
+import { authMiddleware } from "@clerk/nextjs";
 
-const publicPaths = ["/", "/sign-in(.*)", "/sign-up(.*)", "/invoices/(.*)/payment"];
-
-export default WithClerkMiddleware((req) => {
-  const { pathname } = req.nextUrl;
-  
-  if (publicPaths.includes(pathname)) {
-    return NextResponse.next();
-  }
-  
-  // Continue with your auth logic
-  return NextResponse.next();
+// This example protects all routes including api/trpc routes
+// Please edit this to allow other routes to be public as needed.
+export default authMiddleware({
+  publicRoutes: ["/", "/sign-in(.*)", "/sign-up(.*)", "/invoices/(.*)/payment"]
 });
 
 export const config = {
