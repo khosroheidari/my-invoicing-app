@@ -1,29 +1,19 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { WithClerkMiddleware, getAuth } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
 
-const isPublic = createRouteMatcher([
-  "/",
-  "/sign-in(.*)",
-  "/sign-up(.*)",
-  "/invoices/(.*)/payment",
-]);
+const publicPaths = ["/", "/sign-in(.*)", "/sign-up(.*)", "/invoices/(.*)/payment"];
 
-// const isProtected = createRouteMatcher([
-//   '/dashboard',
-//   '/invoices/:invoiceId',
-//   '/invoices/new'
-// ])
-
-export default clerkMiddleware((auth, request) => {
-  if (!isPublic(request)) {
-    auth().protect();
+export default WithClerkMiddleware((req) => {
+  const { pathname } = req.nextUrl;
+  
+  if (publicPaths.includes(pathname)) {
+    return NextResponse.next();
   }
+  
+  // Continue with your auth logic
+  return NextResponse.next();
 });
 
 export const config = {
-  matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
-    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-    // Always run for API routes
-    "/(api|trpc)(.*)",
-  ],
+  matcher: ["/((?!.*\\..*|_next).*)", "/", "/(api|trpc)(.*)"],
 };
